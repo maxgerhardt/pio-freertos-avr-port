@@ -5,11 +5,17 @@
 #define mainBLINK_LED_OK_HALF_PERIOD	( ( TickType_t ) (500 / portTICK_PERIOD_MS))
 #define mainLED_BLINK_PRIORITY			( tskIDLE_PRIORITY + 2 )
 
-/* defines for which LED to use. PB5. */
+/* defines for which LED to use. PB7 on an Arduino Mega2560. PB5 (D13) on an uno. */
+#ifdef __AVR_ATmega2560__
+#define partestLED_PORTB_DATA_REG_BIT			( (uint8_t) 0x01 << 7 )
+#define partestLED_PORTB_DIR_REG_BIT			( (uint8_t) 0x01 << 7 )
+#define partestLED_ON							partestLED_PORTB_DIR_REG_BIT
+#else
 #define partestLED_PORTB_DATA_REG_BIT			( (uint8_t) 0x01 << 5 )
 #define partestLED_PORTB_DIR_REG_BIT			( (uint8_t) 0x01 << 5 )
 #define partestLED_ON							partestLED_PORTB_DIR_REG_BIT
-static volatile uint8_t uCurrentLedOutputVal = ~partestLED_ON;
+#endif
+static volatile uint8_t uCurrentLedOutputVal = (uint8_t) ~partestLED_ON;
 void vParTestToggleLED( UBaseType_t uxLED );
 void vParTestInitialise( void );
 static void vBlinkOnboardUserLED( void *pvParameters );
@@ -51,7 +57,7 @@ void vParTestInitialise( void )
 	/* Turn on user LED. This function is not thread safe. */
 	DDRB |= partestLED_PORTB_DIR_REG_BIT;
 	PORTB |= partestLED_PORTB_DIR_REG_BIT;
-	uCurrentLedOutputVal = ~partestLED_ON;
+	uCurrentLedOutputVal = (uint8_t) ~partestLED_ON;
 }
 
 
@@ -69,7 +75,7 @@ void vParTestToggleLED( UBaseType_t uxLED )
 		/* Turn off. */
 		DDRB |= partestLED_PORTB_DIR_REG_BIT;
 		PORTB &= ~partestLED_PORTB_DIR_REG_BIT;
-		uCurrentLedOutputVal = ~partestLED_ON;
+		uCurrentLedOutputVal = (uint8_t) ~partestLED_ON;
 	}
 	else
 	{
