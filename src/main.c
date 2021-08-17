@@ -2,7 +2,7 @@
 #include <task.h>
 
 /* The period to toggle LED. */
-#define mainBLINK_LED_OK_HALF_PERIOD	( ( TickType_t ) (500 / portTICK_PERIOD_MS))
+#define mainBLINK_LED_OK_HALF_PERIOD	( ( TickType_t ) (100 / portTICK_PERIOD_MS))
 #define mainLED_BLINK_PRIORITY			( tskIDLE_PRIORITY + 2 )
 
 /* defines for which LED to use. PB7 on an Arduino Mega2560. PB5 (D13) on an uno. */
@@ -18,7 +18,7 @@
 static volatile uint8_t uCurrentLedOutputVal = (uint8_t) ~partestLED_ON;
 void vParTestToggleLED( UBaseType_t uxLED );
 void vParTestInitialise( void );
-static void vBlinkOnboardUserLED( void *pvParameters );
+static portTASK_FUNCTION_PROTO(vBlinkOnboardUserLED, pvParameters);
 
 extern void* __malloc_heap_end;
 extern unsigned int __malloc_margin;
@@ -32,12 +32,14 @@ int main() {
   vParTestInitialise();
   xTaskCreate( vBlinkOnboardUserLED, "LED", 50, NULL, mainLED_BLINK_PRIORITY, NULL );
 
-	vTaskStartScheduler();
+  vTaskStartScheduler();
   //not reached
   return 0;
 }
 
-static void vBlinkOnboardUserLED( void *pvParameters )
+//use portTASK_FUNCTION to implement function
+//needed per ATMega portmacro.h for ATMege2560 to place stuff in the low part of flash
+static portTASK_FUNCTION(vBlinkOnboardUserLED, pvParameters)
 {
 	/* The parameters are not used. */
 	( void ) pvParameters;
